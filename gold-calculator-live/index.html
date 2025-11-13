@@ -2,28 +2,22 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
     <title>Gold Value Calculator - Calculate Your Gold Worth</title>
     <meta name="description" content="Calculate the value of your gold jewelry, coins, and bars. Get instant estimates with our accurate gold calculator using current market prices and detailed purity analysis.">
     <meta name="keywords" content="gold calculator, gold value, gold price, karat calculator, precious metals">
-    
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Railway API Configuration with Enhanced Error Handling -->
+    <!-- ============================================ -->
+    <!-- RAILWAY API CONFIGURATION - FIXED VERSION -->
+    <!-- ============================================ -->
     <script>
-      // Railway API URL - Production
+      // Railway API URL
       const RAILWAY_API_URL = 'https://gold-calculator-api-production.up.railway.app';
       
-      // Fallback gold prices (used if API fails)
-      const FALLBACK_PRICES = {
-        usd_per_oz: 2650.00,
-        usd_per_gram: 85.20
-      };
-      
-      // Enhanced Fetch Interceptor with Error Recovery
+      // Enhanced Fetch Interceptor with Endpoint Mapping
       const originalFetch = window.fetch;
       window.fetch = function(...args) {
         let url = args[0];
@@ -38,102 +32,91 @@
           }
           
           args[0] = url;
-          console.log('🚀 Fetching from Railway API:', url);
+          console.log('🚀 API call redirected to Railway:', url);
         }
         
         return originalFetch.apply(this, args)
-          .then(async response => {
+          .then(response => {
             if (response.ok) {
-              console.log('✅ Railway API responded successfully');
-              const clonedResponse = response.clone();
-              try {
-                const data = await clonedResponse.json();
-                console.log('💰 Live Gold Prices:', data);
-              } catch (e) {}
-              return response;
+              console.log('✅ API response received successfully');
             } else {
-              console.warn('⚠️ Railway API returned non-OK status:', response.status);
-              // Return fallback data
-              return new Response(JSON.stringify(FALLBACK_PRICES), {
-                status: 200,
-                headers: { 'Content-Type': 'application/json' }
-              });
+              console.error('❌ API response error:', response.status);
             }
+            return response;
           })
           .catch(error => {
-            console.error('❌ Railway API fetch failed:', error);
-            console.log('🔄 Using fallback prices');
-            // Return fallback data on network error
-            return new Response(JSON.stringify(FALLBACK_PRICES), {
-              status: 200,
-              headers: { 'Content-Type': 'application/json' }
-            });
+            console.error('❌ API fetch error:', error);
+            throw error;
           });
       };
       
-      console.log('✅ Railway API integration initialized');
-      console.log('📡 API Endpoint:', RAILWAY_API_URL + '/api/gold-prices');
-      console.log('🔄 Fallback prices configured');
+      console.log('✅ Railway API integration active!');
+      console.log('📡 API Base URL:', RAILWAY_API_URL);
     </script>
     
-    <!-- Stylesheet - Relative Path for WordPress Compatibility -->
-    <link rel="stylesheet" crossorigin href="assets/index-4rN_RwPx.css">
-    
-    <!-- WordPress iFrame Compatibility CSS -->
+    <!-- ============================================ -->
+    <!-- FAQ REMOVAL & 60 SECOND TIMER FIX -->
+    <!-- ============================================ -->
     <style>
-      /* Ensure proper rendering in WordPress iFrame */
-      html, body {
-        margin: 0;
-        padding: 0;
-        width: 100%;
-        overflow-x: hidden;
-        -webkit-overflow-scrolling: touch;
+      /* Hide FAQ Section - WordPress will handle FAQs */
+      [data-testid="heading-faq"],
+      [data-testid*="faq"],
+      .faq-section,
+      section:has(h2:contains("Frequently Asked Questions")),
+      h2:contains("FAQ"),
+      h2:contains("Frequently Asked Questions") {
+        display: none !important;
+        visibility: hidden !important;
+        height: 0 !important;
+        overflow: hidden !important;
+        opacity: 0 !important;
       }
       
-      body {
-        min-height: 100vh;
-      }
-      
-      #root {
-        width: 100%;
-        min-height: 100vh;
-      }
-      
-      /* Prevent horizontal scroll issues in iframe */
-      * {
-        max-width: 100%;
-        box-sizing: border-box;
-      }
-      
-      /* Mobile optimization */
-      @media (max-width: 768px) {
-        body {
-          font-size: 16px; /* Prevent zoom on iOS */
-        }
+      /* Also hide FAQ items/containers */
+      div:has(> h2:contains("Frequently Asked Questions")),
+      div:has(> h2:contains("FAQ")) {
+        display: none !important;
       }
     </style>
+    
+    <script>
+      // ============================================
+      // 60 SECOND TIMER OVERRIDE
+      // ============================================
+      window.addEventListener('DOMContentLoaded', function() {
+        // Override any 10-minute (600000ms) intervals to 60 seconds (60000ms)
+        const originalSetInterval = window.setInterval;
+        window.setInterval = function(callback, delay, ...args) {
+          // If delay is 10 minutes (600000ms), change to 60 seconds (60000ms)
+          if (delay === 600000) {
+            console.log('⏰ Timer changed: 10 minutes → 60 seconds');
+            delay = 60000; // 60 seconds
+          }
+          return originalSetInterval(callback, delay, ...args);
+        };
+        
+        // Also remove FAQ sections from DOM after page load
+        setTimeout(function() {
+          const faqElements = document.querySelectorAll('[data-testid*="faq"], .faq-section, section, div');
+          faqElements.forEach(function(el) {
+            const text = el.textContent || '';
+            if (text.includes('Frequently Asked Questions') || text.includes('FAQ')) {
+              const heading = el.querySelector('h2, h3, h4');
+              if (heading && (heading.textContent.includes('FAQ') || heading.textContent.includes('Frequently Asked Questions'))) {
+                el.style.display = 'none';
+                el.remove();
+                console.log('✅ FAQ section removed from DOM');
+              }
+            }
+          });
+        }, 1000);
+      });
+    </script>
+    
+    <script type="module" crossorigin src="assets/index-J-L0VIfX.js"></script>
+    <link rel="stylesheet" crossorigin href="assets/index-4rN_RwPx.css">
   </head>
   <body>
     <div id="root"></div>
-    
-    <!-- Main JavaScript - Relative Path for WordPress Compatibility -->
-    <script type="module" crossorigin src="assets/index-J-L0VIfX.js"></script>
-    
-    <!-- Error Recovery Script -->
-    <script>
-      // Detect if app failed to load
-      setTimeout(function() {
-        const root = document.getElementById('root');
-        if (!root || root.children.length === 0) {
-          console.error('❌ Calculator failed to initialize');
-          root.innerHTML = '<div style="padding: 40px; text-align: center; font-family: Inter, sans-serif;"><h2>Loading Calculator...</h2><p>Please wait a moment while the calculator loads.</p></div>';
-        }
-      }, 3000);
-      
-      // Log successful initialization
-      window.addEventListener('load', function() {
-        console.log('✅ Calculator page loaded successfully');
-      });
-    </script>
   </body>
 </html>
